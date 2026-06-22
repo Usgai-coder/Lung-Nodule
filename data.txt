@@ -1,0 +1,11 @@
+preprocessed_cubes/ (LUNA16 全肺预处理标准 3D 矩阵)
+
+all_roi_cubes/ (LIDC 提取的 32x32 结节局部 3D ROI 矩阵)
+
+master_data_exploration.csv (临床全维度探索大账本)
+
+cleaned_nodules_labels.csv (清洗后的黄金结节核心清单)
+
+final_dataset_manifest.csv (挂载了多维标签的资产总账)
+
+final_split_train_manifest.csv (防泄露 7:1:2 数据集切分索引表)

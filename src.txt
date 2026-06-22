@@ -1,0 +1,9 @@
+README.md (项目环境配置与执行指南)
+
+src/preprocess.py (LUNA16 全自动全肺去标识化、重采样与闭运算实质分割)
+
+src/explore_data.py (LIDC-IDRI 标注聚类与特征挖掘)
+
+src/extract_roi.py (3D 矩阵等方性裁剪与归一化提取)
+
+src/split_dataset.py (防泄露算法与数据集切分)
