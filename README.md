@@ -88,16 +88,16 @@ python src/extract_roi.py
 
 ## * 5. 快速开始与环境配置 (Quick Start)
 
-1. 使用 conda 创建纯净虚拟环境
+**1**. 使用 conda 创建纯净虚拟环境
 ```text
 conda create -n lung_nodule python=3.9 -y
 conda activate lung_nodule
 ```
 
-2. 一键安装高吞吐医学影像处理依赖链
+**2**. 一键安装高吞吐医学影像处理依赖链
 ```text
 pip install pandas numpy pyyaml pydicom SimpleITK scikit-image scipy
 ```
 
-3. 校验路径
+**3**. 校验路径
 请检查 config/config.yaml 中的 raw_lidc_dir 和 raw_luna_dir 是否指向正确的原始硬盘路径。
