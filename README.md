@@ -52,3 +52,48 @@ Lung-Nodule/
 │   └── split_dataset.py            # 最大风险锁定、患者级防泄露 7:1:2 发牌
 │
 └── README.md                       # 本说明文档Lung-Nodule
+```
+
+---
+
+## * 4. 工业级流水线运行指南 (Execution Guide)
+为确保整个数据流动管道平滑闭环且表头无污染，请严格按照以下一键通关顺序执行：
+
+**模块一**：医学图像全肺标准化预处理验证 (基于 LUNA16)
+执行端到端的图像几何重构：涵盖去标识化、等方性插值、基于 sitkBall 的 3D 闭运算肺实质分割，以及空气掩膜的安全填充。
+```text
+python src/preprocess.py
+```
+
+**模块二**：多维特征清洗与 3D ROI 构建 (基于 LIDC-IDRI)
+* **第一步**：数据解构、空间聚类与临床大清洗
+基于欧氏距离融合多位医生的异构标注，应用核心过滤网。
+```text
+python src/explore_data.py
+```
+
+* **第二步**：3D ROI 物理裁切与多分类特征绑定
+根据绝对物理坐标裁切立方体，并行挂载良恶性及多风险标签。
+```text
+python src/explore_data.py
+```
+
+* **第三步**：最大风险锁定与 7:1:2 防泄露切分
+以患者 ID 为底层单元执行洗牌，对齐 72% : 10% : 18% 黄金交叉，输出 3D-CNN DataLoader 的标准索引。
+```text
+python src/extract_roi.py
+```
+
+---
+
+## * 5. 快速开始与环境配置 (Quick Start)
+
+# 1. 使用 conda 创建纯净虚拟环境
+conda create -n lung_nodule python=3.9 -y
+conda activate lung_nodule
+
+# 2. 一键安装高吞吐医学影像处理依赖链
+pip install pandas numpy pyyaml pydicom SimpleITK scikit-image scipy
+
+# 3. 校验路径
+# 请检查 config/config.yaml 中的 raw_lidc_dir 和 raw_luna_dir 是否指向正确的原始硬盘路径。
