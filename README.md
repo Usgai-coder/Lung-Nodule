@@ -100,4 +100,5 @@ pip install pandas numpy pyyaml pydicom SimpleITK scikit-image scipy
 ```
 
 **3**. 校验路径
+
 请检查 config/config.yaml 中的 raw_lidc_dir 和 raw_luna_dir 是否指向正确的原始硬盘路径。
