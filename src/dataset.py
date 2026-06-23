@@ -22,7 +22,7 @@ class LungNodule3DDataset(Dataset):
         raw_manifest = pd.read_csv(manifest_path)
         
         # 2. 【核心修改：强力过滤网】
-        # 只保留文件名真正以 '.npy' 结尾的健康数据，自动踢掉所有写着"未提取或提取失败"的脏数据！
+        # 只保留文件名真正以 '.npy' 结尾的健康数据，自动踢掉所有写着"未提取或提取失败"的数据
         self.manifest = raw_manifest[raw_manifest['cube_file_path'].str.endswith('.npy', na=False)].reset_index(drop=True)
         
     def __len__(self):
