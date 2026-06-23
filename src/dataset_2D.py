@@ -2,11 +2,11 @@ import os
 import torch
 import numpy as np
 import pandas as pd
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset
 
-class LungNodule3DDataset(Dataset):
+class LungNodule2DDataset(Dataset):
     """
-    3D Lung Nodule Dataset for PyTorch (肺结节 3D 影像数据集)
+    2D Lung Nodule Dataset for PyTorch (肺结节 2D 横截面影像数据集)
     """
     def __init__(self, manifest_path, cube_dir, transform=None):
         """
@@ -31,9 +31,26 @@ class LungNodule3DDataset(Dataset):
         """
         return len(self.manifest)
 
+    def _get_max_cross_section(self, cube_array):
+        """
+        核心算法：寻找结节的最大横截面 (Max Cross-Section)
+        遍历 Z 轴的每一层切片，计算每一层非背景像素的数量，找出面积最大的那一层。
+        """
+        max_area = -1
+        best_slice_idx = cube_array.shape[0] // 2  # 设定默认值为中心层
+        
+        for z in range(cube_array.shape[0]):
+            slice_2d = cube_array[z, :, :]
+            area = np.sum(slice_2d > 0.01) 
+            if area > max_area:
+                max_area = area
+                best_slice_idx = z
+                
+        return cube_array[best_slice_idx, :, :]
+
     def __getitem__(self, idx):
         """
-        Generates one sample of data (提取单个样本及其对应的标签).
+        Generates one sample of data (提取单个样本的 2D 最大横截面及其对应的标签).
         """
         # 1. Get file name and label from the manifest
         row = self.manifest.iloc[idx]
@@ -51,14 +68,17 @@ class LungNodule3DDataset(Dataset):
         cube_path = os.path.join(self.cube_dir, pure_file_name)
         cube_array = np.load(cube_path)
         
-        # 3. Add Channel dimension: (D, H, W) -> (C, D, H, W) (医学单通道灰度图 C=1)
-        cube_array = np.expand_dims(cube_array, axis=0)
+        # 3. 🌟 压缩提取最大横截面 (D, H, W) -> (H, W)
+        slice_2d = self._get_max_cross_section(cube_array)
         
-        # 4. Convert to PyTorch Tensor
-        image_tensor = torch.tensor(cube_array, dtype=torch.float32)
+        # 4. Add Channel dimension: (H, W) -> (C, H, W) (医学单通道灰度图 C=1)
+        slice_2d = np.expand_dims(slice_2d, axis=0)
+        
+        # 5. Convert to PyTorch Tensor
+        image_tensor = torch.tensor(slice_2d, dtype=torch.float32)
         label_tensor = torch.tensor(label, dtype=torch.long)
         
-        # 5. Apply transforms if any
+        # 6. Apply transforms if any
         if self.transform:
             image_tensor = self.transform(image_tensor)
             
@@ -74,12 +94,12 @@ if __name__ == "__main__":
     
     try:
         # 初始化 Dataset
-        test_dataset = LungNodule3DDataset(manifest_path=TEST_MANIFEST, cube_dir=TEST_CUBE_DIR)
+        test_dataset = LungNodule2DDataset(manifest_path=TEST_MANIFEST, cube_dir=TEST_CUBE_DIR)
         print(f"✅ Successfully loaded dataset with {len(test_dataset)} samples.")
         
         # 提取第一个样本测试形状
         img, lbl = test_dataset[0]
-        print(f"📦 Image Tensor Shape: {img.shape}") # 期望输出: torch.Size([1, 32, 32, 32])
+        print(f"📦 Image Tensor Shape: {img.shape}") # 期望输出: torch.Size([1, 32, 32])
         print(f"🏷️ Label Tensor: {lbl}")
         
     except Exception as e:
